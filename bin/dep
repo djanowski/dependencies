@@ -1,0 +1,7 @@
+#! /usr/bin/env ruby
+
+require "dependencies/dep"
+
+Dep.new(File.read("dependencies")).filter(ARGV.first).each do |dep|
+  puts dep
+end

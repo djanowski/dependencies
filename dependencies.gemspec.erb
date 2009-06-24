@@ -1,0 +1,22 @@
+Gem::Specification.new do |s|
+  s.name              = "dependencies"
+  s.version           = "0.0.2"
+  s.summary           = "Specify your project's dependencies in one file."
+  s.authors           = ["Damian Janowski", "Michel Martens"]
+  s.email             = ["djanowski@dimaion.com", "michel@soveran.com"]
+
+  s.rubyforge_project = "dependencies"
+
+  s.executables << "dep"
+
+  s.files = <%= Dir[
+    "LICENSE",
+    "README*",
+    "Rakefile",
+    "Thorfile",
+    "bin/*",
+    "*.gemspec",
+    "lib/**/*.rb",
+    "test/**/*.*"
+  ].inspect %>
+end
