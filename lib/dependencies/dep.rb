@@ -72,11 +72,13 @@ class Dep
     end
 
     if !@missing.empty?
-      $stderr.puts "Missing dependencies:\n\n"
+      $stderr.puts "\nMissing dependencies:\n\n"
 
       @missing.each do |dep|
         $stderr.puts "  #{dep}"
       end
+
+      $stderr.puts
     end
 
     $:.unshift File.expand_path("lib")

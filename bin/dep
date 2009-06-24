@@ -2,6 +2,12 @@
 
 require "dependencies/dep"
 
-Dep.new(File.read("dependencies")).filter(ARGV.first).each do |dep|
+env = ARGV.first
+
+deps = Dep.new(File.read("dependencies"))
+
+deps.filter(env).each do |dep|
   puts dep
 end
+
+deps.require(env)
