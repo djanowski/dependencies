@@ -6,36 +6,35 @@ require "thor"
 
 class App < Thor
   def list(env = nil)
-    deps.filter(env).each do |dep|
-      puts dep
-    end
-
+    deps.filter(env).each { |dep| puts dep }
     deps.require(env)
   end
 
   def vendor(name)
-    if dep = deps.find {|d| d.name == name }
-      if dep.url
-        FileUtils.mkdir("vendor") unless File.exist?("vendor")
+    dep = dependency(name)  || flunk("Dependency #{name} not found in dependencies.")
+    dep.url                 || flunk("Don't know where to vendor #{name} from (no URL given...)")
 
-        Dir.chdir("vendor") do
-          system "git clone #{dep.url} #{dep.name} -q"
+    FileUtils.mkdir("vendor") unless File.directory?("vendor")
 
-          Dir.chdir(dep.name) do
-            FileUtils.rm_rf(".git")
-          end
-        end
-      else
-        $stderr.puts "Don't know where to vendor #{dep.name} from (no URL given...)"
-      end
-    else
-      $stderr.puts "Dependency #{name} not found."
+    Dir.chdir("vendor") do
+      system "git clone #{dep.url} #{dep.name} -q"
+      Dir.chdir(dep.name) { FileUtils.rm_rf(".git") }
     end
   end
 
 protected
+
   def deps
     @deps ||= Dep.new(File.read("dependencies"))
+  end
+
+  def dependency(name)
+    deps.find { |dep| dep.name == name }
+  end
+
+  def flunk(message)
+    $stderr.puts(message)
+    exit 1
   end
 end
 
