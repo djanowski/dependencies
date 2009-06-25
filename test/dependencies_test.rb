@@ -1,5 +1,5 @@
 require "rubygems"
-require "ruby-debug"
+require "open3"
 
 gem "contest"
 
@@ -81,22 +81,86 @@ class DependenciesTest < Test::Unit::TestCase
 
   context "binary" do
     def dep(args = nil)
-      %x{ruby -I#{LIB} -rubygems #{File.expand_path(File.join("../bin/dep"))} #{args}}
+      out, err = nil
+
+      Open3.popen3("ruby -I#{LIB} -rubygems #{File.expand_path(File.join("../bin/dep"))} #{args}") do |stdin, stdout, stderr|
+        out = stdout.read
+        err = stderr.read
+      end
+
+      [out, err]
     end
 
-    test "prints all dependencies" do
-      with_dependencies "foo ~> 1.0\nbar" do
-        out = dep
+    context "list" do
+      test "prints all dependencies" do
+        with_dependencies "foo ~> 1.0\nbar" do
+          out, err = dep "list"
 
-        assert_equal "foo ~> 1.0\nbar\n", out
+          assert_equal "foo ~> 1.0\nbar\n", out
+        end
+      end
+
+      test "prints dependencies based on given environment" do
+        with_dependencies "foo 1.0 (test)\nbar (development)\nbarz 2.0\nbaz 0.1 (test)" do
+          out, err = dep "list test"
+
+          assert_equal "foo 1.0 (test)\nbarz 2.0\nbaz 0.1 (test)\n", out
+        end
       end
     end
 
-    test "prints dependencies based on given environment" do
-      with_dependencies "foo 1.0 (test)\nbar (development)\nbarz 2.0\nbaz 0.1 (test)" do
-        out = dep "test"
+    context "vendor" do
+      setup do
+        @dir = create_repo("foobar")
+      end
 
-        assert_equal "foo 1.0 (test)\nbarz 2.0\nbaz 0.1 (test)\n", out
+      test "vendors dependencies" do
+        with_dependencies "foobar 1.0 file://#{@dir}" do
+          out, err = dep "vendor foobar"
+
+          assert File.exist?("vendor/foobar/lib/foobar.rb")
+          assert !File.exist?("vendor/foobar/.git")
+        end
+      end
+
+      test "complains when no URL given" do
+        with_dependencies "foobar 1.0" do
+          out, err = dep "vendor foobar"
+
+          assert_match %r{Don't know where to vendor foobar from \(no URL given...\)}, err
+        end
+      end
+
+      test "complains when the dependency is not found" do
+        with_dependencies "foobar 1.0" do
+          out, err = dep "vendor qux"
+
+          assert_match %r{Dependency qux not found.}, err
+        end
+      end
+
+      teardown do
+        FileUtils.rm_rf(@dir)
+      end
+
+      def create_repo(name)
+        dir = File.expand_path(File.join(File.dirname(__FILE__), "tmp", name))
+
+        FileUtils.rm_rf(dir)
+        FileUtils.rm_rf("vendor/#{name}")
+        FileUtils.mkdir_p(dir)
+
+        Dir.chdir(dir) do
+          `git init`
+
+          FileUtils.mkdir("lib")
+          FileUtils.touch("lib/#{name}.rb")
+
+          `git add lib`
+          `git commit -m 'Lorem.'`
+        end
+
+        dir
       end
     end
   end

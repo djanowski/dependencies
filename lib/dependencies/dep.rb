@@ -1,15 +1,15 @@
 class Dep
-  attr :dependencies
-
   class Dependency
     attr :name
     attr :version
     attr :environment
+    attr :url
 
-    def initialize(name, version = nil, environment = nil)
+    def initialize(name, version = nil, environment = nil, url = nil)
       @name = name
       @version = version if version && !version.empty?
       @environment = environment ? environment.split(/\, ?/) : []
+      @url = url
     end
 
     def for_environment?(env)
@@ -50,13 +50,17 @@ class Dep
     end
   end
 
+  include Enumerable
+
+  attr :dependencies
+
   def initialize(dependencies)
     @dependencies = []
     @missing = []
 
     dependencies.each_line do |line|
-      next unless line =~ /^([\w\-_]+) ?([<~=> \d\.]+)?( \(([\w, ]+)\))?$/
-      @dependencies << Dependency.new($1, $2, $4)
+      next unless line =~ /^([\w\-_]+) ?([<~=> \d\.]+)?(?: \(([\w, ]+)\))?(?: ([a-z]+:\/\/.+?))?$/
+      @dependencies << Dependency.new($1, $2, $3, $4)
     end
   end
 

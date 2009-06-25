@@ -1,3 +1,5 @@
-/vendor
 /dependencies
 /pkg
+/test/tmp
+/test/vendor/foobar
+/vendor

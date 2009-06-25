@@ -1,13 +1,42 @@
 #! /usr/bin/env ruby
 
+require "fileutils"
 require "dependencies/dep"
+require "thor"
 
-env = ARGV.first
+class App < Thor
+  def list(env = nil)
+    deps.filter(env).each do |dep|
+      puts dep
+    end
 
-deps = Dep.new(File.read("dependencies"))
+    deps.require(env)
+  end
 
-deps.filter(env).each do |dep|
-  puts dep
+  def vendor(name)
+    if dep = deps.find {|d| d.name == name }
+      if dep.url
+        FileUtils.mkdir("vendor") unless File.exist?("vendor")
+
+        Dir.chdir("vendor") do
+          system "git clone #{dep.url} #{dep.name} -q"
+
+          Dir.chdir(dep.name) do
+            FileUtils.rm_rf(".git")
+          end
+        end
+      else
+        $stderr.puts "Don't know where to vendor #{dep.name} from (no URL given...)"
+      end
+    else
+      $stderr.puts "Dependency #{name} not found."
+    end
+  end
+
+protected
+  def deps
+    @deps ||= Dep.new(File.read("dependencies"))
+  end
 end
 
-deps.require(env)
+App.start

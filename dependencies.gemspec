@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = "dependencies"
-  s.version           = "0.0.2"
+  s.version           = "0.0.3"
   s.summary           = "Specify your project's dependencies in one file."
   s.authors           = ["Damian Janowski", "Michel Martens"]
   s.email             = ["djanowski@dimaion.com", "michel@soveran.com"]
@@ -9,5 +9,7 @@ Gem::Specification.new do |s|
 
   s.executables << "dep"
 
-  s.files = ["Rakefile", "bin/dep", "dependencies.gemspec", "lib/dependencies/dep.rb", "lib/dependencies.rb", "test/dependencies_test.rb", "test/vendor/barz-2.0", "test/vendor/baz-1.0"]
+  s.files = ["Rakefile", "bin/dep", "dependencies.gemspec", "lib/dependencies/dep.rb", "lib/dependencies.rb", "test/dependencies_test.rb", "test/vendor/bar/lib", "test/vendor/barz-2.0/lib", "test/vendor/baz-1.0/lib"]
+
+  s.add_dependency("thor", "~> 0.9")
 end
