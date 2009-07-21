@@ -10,7 +10,21 @@ class App < Thor
     deps.require(env)
   end
 
-  def vendor(name)
+  def vendor(name = nil)
+    # method_options doesn't work here because the name argument is optional.
+
+    flunk "No dependency given. Did you mean --all?" unless name
+
+    if name == "--all"
+      vendor_all
+    else
+      vendor_one(name)
+    end
+  end
+
+protected
+
+  def vendor_one(name)
     dep = dependency(name)  || flunk("Dependency #{name} not found in dependencies.")
     dep.url                 || flunk("Don't know where to vendor #{name} from (no URL given...)")
 
@@ -22,7 +36,13 @@ class App < Thor
     end
   end
 
-protected
+  def vendor_all
+    prevent_exit do
+      deps.each do |dep|
+        vendor_one(dep.name)
+      end
+    end
+  end
 
   def deps
     @deps ||= Dep.new(File.read("dependencies"))
@@ -34,7 +54,14 @@ protected
 
   def flunk(message)
     $stderr.puts(message)
-    exit 1
+    exit 1 unless @prevent_exit
+  end
+
+  def prevent_exit
+    aux, @prevent_exit = @prevent_exit, false
+    yield
+  ensure
+    @prevent_exit = aux
   end
 end
 

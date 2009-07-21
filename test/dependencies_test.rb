@@ -139,6 +139,18 @@ class DependenciesTest < Test::Unit::TestCase
         end
       end
 
+      test "vendors everything with --all" do
+        with_dependencies "foobar 1.0 file://#{@dir}\nbarbar file://#{create_repo "barbar"}" do
+          out, err = dep "vendor --all"
+
+          assert File.exist?("vendor/foobar/lib/foobar.rb")
+          assert !File.exist?("vendor/foobar/.git")
+
+          assert File.exist?("vendor/barbar/lib/barbar.rb")
+          assert !File.exist?("vendor/barbar/.git")
+        end
+      end
+
       teardown do
         FileUtils.rm_rf(@dir)
       end
