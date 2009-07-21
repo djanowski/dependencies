@@ -33,6 +33,8 @@ class Dep
     end
 
     def require_gem
+      return unless defined?(Gem)
+
       begin
         gem(*[name, version].compact)
         true
