@@ -5,20 +5,23 @@ require "dependencies/dep"
 require "thor"
 
 class App < Thor
+  include Thor::Actions
+
+  desc "list [ENV]", "lists dependencies"
   def list(env = nil)
     deps.filter(env).each { |dep| puts dep }
     deps.require(env)
   end
 
+  desc "vendor", "vendors the dependency to ./vendor"
+  method_options :all => :boolean
   def vendor(name = nil)
-    # method_options doesn't work here because the name argument is optional.
+    name || options[:all] || flunk("No dependency given. Did you mean --all?")
 
-    flunk "No dependency given. Did you mean --all?" unless name
-
-    if name == "--all"
-      vendor_all
-    else
+    if name
       vendor_one(name)
+    else
+      vendor_all
     end
   end
 
@@ -30,9 +33,9 @@ protected
 
     FileUtils.mkdir("vendor") unless File.directory?("vendor")
 
-    Dir.chdir("vendor") do
-      system "git clone #{dep.url} #{dep.name} -q"
-      Dir.chdir(dep.name) { FileUtils.rm_rf(".git") }
+    inside "vendor", :verbose => true do
+      run "git clone #{dep.url} #{dep.name} -q"
+      remove_file File.join(dep.name, ".git")
     end
   end
 
@@ -46,6 +49,8 @@ protected
 
   def deps
     @deps ||= Dep.new(File.read("dependencies"))
+  rescue Errno::ENOENT
+    flunk "No dependencies file found."
   end
 
   def dependency(name)

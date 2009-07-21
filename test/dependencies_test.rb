@@ -107,6 +107,12 @@ class DependenciesTest < Test::Unit::TestCase
           assert_equal "foo 1.0 (test)\nbarz 2.0\nbaz 0.1 (test)\n", out
         end
       end
+
+      test "complains when no dependencies file found" do
+        out, err = dep "list"
+
+        assert_equal "No dependencies file found.\n", err
+      end
     end
 
     context "vendor" do

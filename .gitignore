@@ -2,4 +2,5 @@
 /pkg
 /test/tmp
 /test/vendor/foobar
+/test/vendor/barbar
 /vendor
