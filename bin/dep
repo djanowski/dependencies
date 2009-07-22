@@ -34,7 +34,7 @@ protected
     FileUtils.mkdir("vendor") unless File.directory?("vendor")
 
     inside "vendor", :verbose => true do
-      run "git clone #{dep.url} #{dep.name} -q"
+      run "git clone #{dep.url} #{dep.name} -q --depth 1"
       remove_file File.join(dep.name, ".git")
     end
   end
