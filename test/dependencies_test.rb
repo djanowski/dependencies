@@ -34,15 +34,25 @@ class DependenciesTest < Test::Unit::TestCase
     test "loads dependencies from ./vendor" do
       with_dependencies "bar" do
         do_require
-
         assert_equal File.expand_path("vendor/bar/lib"), $:[1]
+      end
+
+      with_dependencies "bar 1.0" do
+        do_require
+        assert_equal File.expand_path("vendor/bar/lib"), $:[1]
+      end
+    end
+
+    test "honors the version number for the vendor directory" do
+      with_dependencies "foo 2.0" do
+        do_require
+        assert_equal File.expand_path("vendor/foo-2.0/lib"), $:[1]
       end
     end
 
     test "add ./lib to the load path" do
       with_dependencies "" do
         do_require
-
         assert_equal File.expand_path("lib"), $:.first
       end
     end
@@ -95,7 +105,6 @@ class DependenciesTest < Test::Unit::TestCase
       test "prints all dependencies" do
         with_dependencies "foo ~> 1.0\nbar" do
           out, err = dep "list"
-
           assert_equal "foo ~> 1.0\nbar\n", out
         end
       end
@@ -103,14 +112,12 @@ class DependenciesTest < Test::Unit::TestCase
       test "prints dependencies based on given environment" do
         with_dependencies "foo 1.0 (test)\nbar (development)\nbarz 2.0\nbaz 0.1 (test)" do
           out, err = dep "list test"
-
           assert_equal "foo 1.0 (test)\nbarz 2.0\nbaz 0.1 (test)\n", out
         end
       end
 
       test "complains when no dependencies file found" do
         out, err = dep "list"
-
         assert_equal "No dependencies file found.\n", err
       end
     end

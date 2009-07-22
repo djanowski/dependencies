@@ -25,7 +25,8 @@ class Dep
     end
 
     def vendor_path
-      Dir[File.join('vendor', "#{vendor_name}*", 'lib')].first
+      Dir[File.join("vendor", "#{vendor_name}*", "lib")].first ||
+        Dir[File.join("vendor", name, "lib")].first
     end
 
     def require_vendor
