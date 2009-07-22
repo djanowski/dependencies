@@ -86,6 +86,8 @@ class Dep
       end
 
       $stderr.puts
+      $stderr.puts "Run `dep list` anytime to view the missing dependencies.\n\n"
+      exit(1)
     end
 
     $:.unshift File.expand_path("lib")

@@ -11,6 +11,13 @@ require "fileutils"
 
 $:.unshift LIB = File.join(File.dirname(__FILE__), "..", "lib")
 
+class Dep
+
+  # Override exit to allow the tests to keep running.
+  def exit(*attrs)
+  end
+end
+
 class DependenciesTest < Test::Unit::TestCase
   def do_require
     load "dependencies.rb"
@@ -70,6 +77,7 @@ class DependenciesTest < Test::Unit::TestCase
         end
 
         assert err.include?("Missing dependencies:\n\n  foo 1.0")
+        assert err.include?("Run `dep list` anytime to view the missing dependencies")
       end
     end
 
