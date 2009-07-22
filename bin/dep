@@ -29,12 +29,12 @@ protected
 
   def vendor_one(name)
     dep = dependency(name)  || flunk("Dependency #{name} not found in dependencies.")
-    dep.url                 || flunk("Don't know where to vendor #{name} from (no URL given...)")
+    dep.version || dep.url  || flunk("Don't know where to vendor #{name} from (no version or URL given...)")
 
     FileUtils.mkdir("vendor") unless File.directory?("vendor")
 
     inside "vendor", :verbose => true do
-      run "git clone #{dep.url} #{dep.name} -q --depth 1"
+      fetch dep
       remove_file File.join(dep.name, ".git")
     end
   end
@@ -44,6 +44,14 @@ protected
       deps.each do |dep|
         vendor_one(dep.name)
       end
+    end
+  end
+
+  def fetch(dep)
+    if dep.version
+      run "gem unpack #{dep.name} -v #{dep.version}"
+    else
+      run "git clone #{dep.url} #{dep.name} -q --depth 1"
     end
   end
 

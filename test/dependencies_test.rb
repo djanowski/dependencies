@@ -16,6 +16,12 @@ class DependenciesTest < Test::Unit::TestCase
     load "dependencies.rb"
   end
 
+  def ensure_gem_home
+    gem_path = File.expand_path(File.join(File.dirname(__FILE__), "..", "tmp"))
+
+    flunk "GEM_HOME should be #{gem_path}. Run with env GEM_HOME=#{gem_path}." unless gem_path == ENV["GEM_HOME"]
+  end
+
   def with_dependencies(deps)
     File.open("dependencies", "w") do |f|
       f.write(deps)
@@ -128,7 +134,7 @@ class DependenciesTest < Test::Unit::TestCase
       end
 
       test "vendors dependencies" do
-        with_dependencies "foobar 1.0 file://#{@dir}" do
+        with_dependencies "foobar file://#{@dir}" do
           out, err = dep "vendor foobar"
 
           assert File.exist?("vendor/foobar/lib/foobar.rb")
@@ -136,11 +142,24 @@ class DependenciesTest < Test::Unit::TestCase
         end
       end
 
+      test "vendors using RubyGems when given a version" do
+        ensure_gem_home
+
+        system "gem install foobaz-0.3.gem > /dev/null"
+
+        with_dependencies "foobaz 0.3" do
+          out, err = dep "vendor foobaz"
+
+          assert  File.exist?("vendor/foobaz-0.3/lib/foobaz.rb")
+          assert !File.exist?("vendor/foobaz-0.3/.git")
+        end
+      end
+
       test "complains when no URL given" do
-        with_dependencies "foobar 1.0" do
+        with_dependencies "foobar" do
           out, err = dep "vendor foobar"
 
-          assert_match %r{Don't know where to vendor foobar from \(no URL given...\)}, err
+          assert_match %r{Don't know where to vendor foobar from \(no version or URL given...\)}, err
         end
       end
 
@@ -153,7 +172,7 @@ class DependenciesTest < Test::Unit::TestCase
       end
 
       test "vendors everything with --all" do
-        with_dependencies "foobar 1.0 file://#{@dir}\nbarbar file://#{create_repo "barbar"}" do
+        with_dependencies "foobar file://#{@dir}\nbarbar file://#{create_repo "barbar"}" do
           out, err = dep "vendor --all"
 
           assert File.exist?("vendor/foobar/lib/foobar.rb")
