@@ -86,7 +86,7 @@ class Dep
       end
 
       $stderr.puts
-      $stderr.puts "Run `dep list` anytime to view the missing dependencies.\n\n"
+      $stderr.puts "Run `dep list` to view the missing dependencies or `dep vendor --all` to try to solve them.\n\n"
       exit(1)
     end
 
