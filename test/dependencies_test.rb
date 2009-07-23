@@ -77,7 +77,7 @@ class DependenciesTest < Test::Unit::TestCase
         end
 
         assert err.include?("Missing dependencies:\n\n  foo 1.0")
-        assert err.include?("Run `dep list` to view the missing dependencies or `dep vendor --all` to try to solve them")
+        assert err.include?("Run `dep list` to view missing dependencies or `dep vendor --all` if you want to vendor them.")
       end
     end
 

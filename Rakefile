@@ -1,5 +1,5 @@
 task :test do
-  system "cd test && ruby dependencies_test.rb"
+  system "cd test && env GEM_HOME=#{File.expand_path("tmp")} ruby dependencies_test.rb"
 end
 
 task :default => :test
