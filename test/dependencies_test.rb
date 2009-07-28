@@ -1,18 +1,15 @@
 require "rubygems"
 require "open3"
 
-gem "contest"
-
 require "contest"
 
 require "pp"
 require "stringio"
 require "fileutils"
 
-$:.unshift LIB = File.join(File.dirname(__FILE__), "..", "lib")
+$:.unshift File.join(File.dirname(__FILE__), "..", "lib")
 
 class Dep
-
   # Override exit to allow the tests to keep running.
   def exit(*attrs)
   end
@@ -107,7 +104,7 @@ class DependenciesTest < Test::Unit::TestCase
     def dep(args = nil)
       out, err = nil
 
-      Open3.popen3("ruby -I#{LIB} -rubygems #{File.expand_path(File.join("../bin/dep"))} #{args}") do |stdin, stdout, stderr|
+      Open3.popen3("#{File.expand_path(File.join("../bin/dep"))} #{args}") do |stdin, stdout, stderr|
         out = stdout.read
         err = stderr.read
       end
