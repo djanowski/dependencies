@@ -1,21 +1,19 @@
 Dependencies
 ============
 
-Dependencies manager for RACK enabled applications.
+A simple way to express, manage and require your dependencies in Ruby.
 
 Description
 -----------
 
-Dependencies allows you to declare the list of libraries your application needs,
-even specifying the version and environment it will be required in, and all with
-the simple sintax we all have grown to know. It comes with a handy command line
-tool for inspecting your dependencies.
+Dependencies allows you to declare the list of libraries your application needs
+with a simple, readable syntax. It comes with a handy command line
+tool for inspecting and vendoring your dependencies.
 
 Usage
 -----
 
-Declare your dependencies in a `dependencies` in the root of your project.
-This file will look like this:
+Declare your dependencies in a `dependencies` file in the root of your project:
 
     rack ~> 1.0
     sinatra
@@ -32,15 +30,56 @@ Now you can try the `dep` command line tool to check your dependencies:
 
     $ dep list
 
-You can even specify an environment to see if requirements are met:
+You can specify an environment to see if requirements are met:
 
     $ dep list test
 
-The list can contain not only gems, but libraries in `vendor` too. Dependencies
-first checks if a matching library in vendor exists, then tries to find a
-suitable gem.
+The above is `RACK_ENV`-aware.
 
-In order to use it in your project, just require the `dependencies` gem.
+Vendoring libraries
+-------------------
+
+In order to vendor a library you're using, simply:
+
+    $ dep vendor haml
+
+If the dependency is expressed with a version number, it will be vendored using
+`gem unpack`. Otherwise, it will try to clone from a Git repository.
+
+It's common to vendor everything when you start a new project. Try this:
+
+    $ dep vendor --all
+
+Loading dependencies in your project
+------------------------------------
+
+Dependencies doesn't assume you want to use RubyGems, so you're in charge of
+requiring it before requiring `dependencies` (in Ruby 1.9 you're cornered – there's
+no way out).
+
+    # init.rb
+    require "rubygems"
+    require "dependencies"
+
+That will work as long as RubyGems is available and you have Dependencies installed.
+If a dependency is not found in `./vendor`, a call to `#gem` will be made.
+
+Another option is to vendor Dependencies itself:
+
+    # init.rb
+    require "vendor/dependencies/lib/dependencies"
+
+After that, all your `lib` directories below `./vendor` will be available in the `$LOAD_PATH`.
+
+Additionally, Dependencies will leave your `./lib` in the `$LOAD_PATH`.
+
+Benefits
+--------
+
+1. Documentation. It's a text file any team member can read to see what the project depends on.
+2. Early failure. If a dependency is not met, the program terminates with a polite message inviting you to install the missing dependencies.
+3. Vendorability (™). Easily vendor everything for self-contained applications.
+4. Simplicity. It's a very lightweight tool. It won't do everything, but it's simple and works very well for us.
 
 Installation
 ------------
