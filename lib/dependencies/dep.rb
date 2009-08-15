@@ -7,8 +7,8 @@ class Dep
     current = Pathname.new(Dir.pwd)
 
     until current.root?
-      filename = current.join(".dependencies")
-      return filename if filename.exist?
+      filename = current.join("dependencies")
+      return filename if filename.exist? and filename.file?
       current = current.parent
     end
 

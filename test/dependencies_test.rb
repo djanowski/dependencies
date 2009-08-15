@@ -29,13 +29,13 @@ class DependenciesTest < Test::Unit::TestCase
   end
 
   def with_dependencies(deps)
-    File.open(".dependencies", "w") do |f|
+    File.open("dependencies", "w") do |f|
       f.write(deps)
     end
 
     yield
   ensure
-    FileUtils.rm(".dependencies")
+    FileUtils.rm("dependencies")
   end
 
   context "lib" do
