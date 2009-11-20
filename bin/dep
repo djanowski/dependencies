@@ -51,7 +51,7 @@ protected
 
   def fetch(dep)
     if dep.version
-      run "gem unpack #{dep.name} -v #{dep.version}"
+      run "gem unpack #{dep.name} -v '#{dep.version}'"
     else
       run "git clone #{dep.url} #{dep.name} -q --depth 1"
     end
