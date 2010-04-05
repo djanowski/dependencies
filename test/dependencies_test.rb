@@ -7,6 +7,11 @@ require "pp"
 require "stringio"
 require "fileutils"
 
+begin
+  require "ruby-debug"
+rescue LoadError
+end
+
 $:.unshift File.join(File.dirname(__FILE__), "..", "lib")
 
 class Dep
@@ -50,6 +55,14 @@ class DependenciesTest < Test::Unit::TestCase
       with_dependencies "bar 1.0" do
         do_require
         assert_equal File.expand_path("vendor/bar/lib"), $:[1]
+      end
+    end
+
+    test "does not conflict with similar names" do
+      with_dependencies "bar\nbar-core 1.0" do
+        do_require
+        assert_equal File.expand_path("vendor/bar/lib"), $:[2]
+        assert_equal File.expand_path("vendor/bar-core-1.0/lib"), $:[1]
       end
     end
 
