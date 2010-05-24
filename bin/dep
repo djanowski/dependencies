@@ -15,7 +15,7 @@ class App < Thor
     deps.require(env)
   end
 
-  desc "vendor", "vendors the dependency to ./vendor"
+  desc "vendor [NAME|--all]", "vendors the dependency to ./vendor"
   method_options :all => :boolean
   def vendor(name = nil)
     name || options[:all] || flunk("No dependency given. Did you mean --all?")
